@@ -33,6 +33,27 @@ export const loginUser = async (mobile, password) => {
     }
 };
 
+export const AdminContactDetailes = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/website/OtherDetailes/AdminContactDetailes.php`);
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            return data;
+        } catch (e) {
+            console.error('Admin Contact Detailes JSON Parse Error:', e);
+            const jsonMatch = text.match(/\{.*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+            throw new Error('Invalid Admin Contact Detailes JSON: ' + text.substring(0, 50));
+        }
+    } catch (error) {
+        console.error('Admin Contact Detailes API Error:', error);
+        throw error;
+    }
+}
+
 export const registerUser = async (username, password, mobile) => {
     try {
         const response = await fetch(`${API_BASE_URL}/userLogin/register.php`, {

@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/logo/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F5C542"
+      "backgroundColor": "#FFFFFF"
     },
     "updates": {
       "enabled": false
@@ -28,7 +28,7 @@
       "googleServicesFile": "./assets/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/logo.png",
-        "backgroundColor": "#F5C542"
+        "backgroundColor": "#FFFFFF"
       }
     },
     "plugins": [
@@ -38,7 +38,7 @@
           "image": "./assets/logo/splash.png",
           "imageWidth": 250,
           "resizeMode": "contain",
-          "backgroundColor": "#F5C542"
+          "backgroundColor": "#FFFFFF"
         }
       ],
       "expo-font",
@@ -46,7 +46,7 @@
         "expo-notifications",
         {
           "icon": "./assets/logo/logo.png",
-          "color": "#F5C542",
+          "color": "#FFFFFF",
           "defaultChannel": "default"
         }
       ]

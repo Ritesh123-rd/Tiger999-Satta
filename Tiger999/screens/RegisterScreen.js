@@ -189,6 +189,7 @@ export default function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Mpin (4 digits)"
+            secureTextEntry={true}
             placeholderTextColor="#999"
             keyboardType="number-pad"
             maxLength={4}

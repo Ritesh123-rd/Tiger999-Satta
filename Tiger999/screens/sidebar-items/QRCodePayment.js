@@ -11,11 +11,12 @@ import {
   ActivityIndicator,
   Dimensions,
   Modal,
+  Linking,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { QrcodePayment } from '../../api/auth';
+import { QrcodePayment, paymentGetWay } from '../../api/auth';
 import CustomAlert from '../../components/CustomAlert';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -38,6 +39,8 @@ export default function QRCodePayment({ navigation }) {
   const [userId, setUserId] = useState('');
   const [username, setUsername] = useState('');
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showAppSelector, setShowAppSelector] = useState(false);
+  const [selectedUpiUrl, setSelectedUpiUrl] = useState('');
 
   // Custom Alert State
   const [alertConfig, setAlertConfig] = useState({
@@ -61,6 +64,130 @@ export default function QRCodePayment({ navigation }) {
     };
     getUserData();
   }, []);
+
+  const handleQrPress = async () => {
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      setAlertConfig({
+        visible: true,
+        title: 'Amount Required',
+        message: 'Please enter the amount first before tapping the QR code.',
+        type: 'warning'
+      });
+      return;
+    }
+
+    let upiUrl = null;
+    try {
+      const pageRes = await fetch('https://dhlmedia.online/GoldenMatka/admin/Qr-PaymentLinkIMG.php');
+      const pageHtml = await pageRes.text();
+      const match = pageHtml.match(/<img[^>]+src=["']([^"']+)["']/);
+      if (match && match[1]) {
+        const imgUrl = match[1];
+        const fullImgUrl = imgUrl.startsWith('http')
+          ? imgUrl
+          : `https://dhlmedia.online/GoldenMatka/admin/${imgUrl}`;
+
+        const qrApiUrl = `https://api.qrserver.com/v1/read-qr-code/?fileurl=${encodeURIComponent(fullImgUrl)}`;
+        const qrRes = await fetch(qrApiUrl);
+        const qrData = await qrRes.json();
+        
+        if (qrData && qrData[0]?.symbol[0]?.data) {
+          const decodedUpi = qrData[0].symbol[0].data;
+          if (decodedUpi && (decodedUpi.startsWith('upi://') || decodedUpi.startsWith('http'))) {
+            upiUrl = decodedUpi;
+            if (upiUrl.startsWith('upi://')) {
+              if (upiUrl.includes('am=')) {
+                upiUrl = upiUrl.replace(/am=[^&]*/, `am=${amount}`);
+              } else {
+                upiUrl += `&am=${amount}`;
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.log('Error decoding dynamic QR code:', err);
+    }
+
+    if (!upiUrl) {
+      try {
+        const response = await paymentGetWay(userId, username, '', amount);
+        if (response) {
+          const potentialFields = [
+            response.payment_url,
+            response.url,
+            response.redirect_url,
+            response.upi,
+            response.data?.url,
+            response.data?.upi
+          ];
+          
+          for (const field of potentialFields) {
+            if (field && typeof field === 'string' && (field.startsWith('http') || field.startsWith('upi'))) {
+              upiUrl = field;
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        console.log('paymentGetWay fetch error, using fallback:', err);
+      }
+    }
+
+    if (!upiUrl) {
+      const adminUpi = 'raju82086@okhdfcbank';
+      upiUrl = `upi://pay?pa=${adminUpi}&pn=Tiger999&am=${amount}&cu=INR`;
+    }
+
+    if (upiUrl && typeof upiUrl === 'string' && upiUrl.startsWith('upi://')) {
+      if (upiUrl.includes('am=')) {
+        upiUrl = upiUrl.replace(/am=[^&]*/, `am=${amount}`);
+      } else {
+        upiUrl += `&am=${amount}`;
+      }
+    }
+
+    setSelectedUpiUrl(upiUrl || '');
+    setShowAppSelector(true);
+  };
+
+  const openSelectedUpiApp = async (scheme) => {
+    setShowAppSelector(false);
+    let finalUrl = selectedUpiUrl;
+
+    if (finalUrl && typeof finalUrl === 'string' && finalUrl.startsWith('upi://pay')) {
+      finalUrl = finalUrl.replace('upi://pay', scheme);
+    } else if (finalUrl && typeof finalUrl === 'string' && finalUrl.startsWith('upi://')) {
+      finalUrl = finalUrl.replace('upi://', scheme.includes('?') ? scheme : scheme.replace('?pa=', ''));
+    } else if (finalUrl && typeof finalUrl === 'string') {
+      const matchPa = finalUrl.match(/pa=([^&]+)/);
+      const pa = matchPa ? matchPa[1] : 'raju82086@okhdfcbank';
+      finalUrl = `${scheme}?pa=${pa}&pn=Tiger999&am=${amount}&cu=INR`;
+    } else {
+      finalUrl = `${scheme}?pa=raju82086@okhdfcbank&pn=Tiger999&am=${amount}&cu=INR`;
+    }
+
+    try {
+      await Linking.openURL(encodeURI(finalUrl));
+    } catch (error) {
+      console.error('Error opening selected UPI app:', error);
+      try {
+        const fallbackUrl = selectedUpiUrl && typeof selectedUpiUrl === 'string' && selectedUpiUrl.startsWith('http') 
+          ? selectedUpiUrl 
+          : selectedUpiUrl && typeof selectedUpiUrl === 'string' && selectedUpiUrl.startsWith('upi://') 
+            ? selectedUpiUrl 
+            : `upi://pay?pa=raju82086@okhdfcbank&pn=Tiger999&am=${amount}&cu=INR`;
+        await Linking.openURL(encodeURI(fallbackUrl));
+      } catch (e) {
+        setAlertConfig({
+          visible: true,
+          title: 'Payment Error',
+          message: 'Could not open UPI apps on your device. Please enter the UTR manually.',
+          type: 'error'
+        });
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
@@ -153,7 +280,7 @@ export default function QRCodePayment({ navigation }) {
           <TouchableOpacity 
             style={styles.qrWrapper} 
             activeOpacity={0.9}
-            onPress={() => setShowQrModal(true)}
+            onPress={handleQrPress}
           >
             {qrLoading && (
               <ActivityIndicator size="large" color="#C27183" style={styles.qrLoader} />
@@ -172,7 +299,15 @@ export default function QRCodePayment({ navigation }) {
             {/* Overlay to ensure click works over WebView */}
             <View style={styles.qrOverlay} />
           </TouchableOpacity>
-          <Text style={styles.qrNote}>Tap QR to enlarge</Text>
+          <TouchableOpacity 
+            style={styles.payUpiBtn} 
+            activeOpacity={0.8}
+            onPress={handleQrPress}
+          >
+            <Ionicons name="flash" size={18} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.payUpiBtnText}>Pay via UPI App</Text>
+          </TouchableOpacity>
+          <Text style={styles.qrNote}>Or tap QR code above to pay directly</Text>
         </View>
 
         {/* Amount Input */}
@@ -268,6 +403,64 @@ export default function QRCodePayment({ navigation }) {
           setAlertConfig({ ...alertConfig, visible: false, onPress: null });
         }}
       />
+
+      {/* App Selector Modal Popup */}
+      <Modal
+        visible={showAppSelector}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowAppSelector(false)}
+      >
+        <View style={styles.appSelectorOverlay}>
+          <View style={styles.appSelectorSheet}>
+            <Text style={styles.appSelectorTitle}>Choose Your Payment App</Text>
+            
+            <TouchableOpacity 
+              style={[styles.appSelectorItem, { backgroundColor: '#5f259f' }]} 
+              activeOpacity={0.8}
+              onPress={() => openSelectedUpiApp('phonepe://pay')}
+            >
+              <Ionicons name="phone-portrait-outline" size={28} color="#fff" style={styles.appIcon} />
+              <Text style={styles.appSelectorItemText}>PhonePe</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.appSelectorItem, { backgroundColor: '#1a73e8' }]} 
+              activeOpacity={0.8}
+              onPress={() => openSelectedUpiApp('tez://upi/pay')}
+            >
+              <Ionicons name="logo-google" size={28} color="#fff" style={styles.appIcon} />
+              <Text style={styles.appSelectorItemText}>Google Pay</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.appSelectorItem, { backgroundColor: '#00baf2' }]} 
+              activeOpacity={0.8}
+              onPress={() => openSelectedUpiApp('paytmmp://pay')}
+            >
+              <Ionicons name="wallet-outline" size={28} color="#fff" style={styles.appIcon} />
+              <Text style={styles.appSelectorItemText}>Paytm</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.appSelectorItem, { backgroundColor: '#C27183' }]} 
+              activeOpacity={0.8}
+              onPress={() => openSelectedUpiApp('upi://pay')}
+            >
+              <Ionicons name="cash-outline" size={28} color="#fff" style={styles.appIcon} />
+              <Text style={styles.appSelectorItemText}>Other UPI Apps</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.appSelectorCancelBtn} 
+              activeOpacity={0.8}
+              onPress={() => setShowAppSelector(false)}
+            >
+              <Text style={styles.appSelectorCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -352,6 +545,27 @@ const styles = StyleSheet.create({
     color: '#777',
     textAlign: 'center',
     paddingHorizontal: 15,
+  },
+  payUpiBtn: {
+    backgroundColor: '#C27183',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
+    elevation: 2,
+    shadowColor: '#C27183',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  payUpiBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 'bold',
+    fontFamily: 'Poppins_600SemiBold',
   },
   section: {
     marginBottom: 20,
@@ -441,5 +655,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins_600SemiBold',
     textAlign: 'center',
+  },
+  appSelectorOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  appSelectorSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    minHeight: 380,
+  },
+  appSelectorTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_600SemiBold',
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  appSelectorItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  appIcon: {
+    marginRight: 12,
+  },
+  appSelectorItemText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  appSelectorCancelBtn: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  appSelectorCancelText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Poppins_600SemiBold',
   },
 });

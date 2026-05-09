@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { getWalletBalance, getDateTime, getMarkets } from '../api/auth';
+import { getWalletBalance, getDateTime, getMarkets, AdminContactDetailes } from '../api/auth';
 import {
   View,
   Text,
@@ -51,6 +51,10 @@ export default function HomeScreen({ navigation }) {
   const [gamesList, setGamesList] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [adminContacts, setAdminContacts] = useState({
+    call: '1234567890',
+    whatsapp: '1234567890'
+  });
 
   const fetchBalance = async () => {
     // console.log('HomeScreen: fetchBalance started');
@@ -64,6 +68,16 @@ export default function HomeScreen({ navigation }) {
           date: timeData.date,
           time: timeData.time_12,
           day: timeData.day
+        });
+      }
+
+      // Fetch Contacts
+      const contactsResponse = await AdminContactDetailes();
+      if (contactsResponse && contactsResponse.status && contactsResponse.data) {
+        setAdminContacts({
+          call: contactsResponse.data.Call_Number || '1234567890',
+          whatsapp: contactsResponse.data.Whatsapp || '1234567890',
+          whatsappSupport: contactsResponse.data.Whatsapp_Support || '1234567890' 
         });
       }
 
@@ -182,11 +196,15 @@ export default function HomeScreen({ navigation }) {
   );
 
   const makeCall = () => {
-    Linking.openURL('tel:919922222222');
+    Linking.openURL(`tel:+91${adminContacts.call}`);
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=919922222222');
+    Linking.openURL(`whatsapp://send?phone=+91${adminContacts.whatsapp}`);
+  };
+
+  const openSupportWhatsApp = () => {
+    Linking.openURL(`whatsapp://send?phone=+91${adminContacts.whatsappSupport}`);
   };
 
   const shareApp = async () => {
@@ -260,12 +278,12 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.contactContainer}>
           <TouchableOpacity style={styles.contactButton} onPress={makeCall}>
             <Image source={require('../assets/Home-Banner/call.png')} style={styles.contactIcon} />
-            <Text style={styles.contactText}>1234567890</Text>
+            <Text style={styles.contactText}>{adminContacts.call}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.contactButtonWhatsapp} onPress={openWhatsApp}>
             <Image source={require('../assets/Home-Banner/iwp.png')} style={styles.contactIcon} />
-            <Text style={styles.contactText}>1234567890</Text>
+            <Text style={styles.contactText}>{adminContacts.whatsapp}</Text>
           </TouchableOpacity>
         </View>
 
@@ -393,7 +411,7 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.navText}>Funds</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={openSupportWhatsApp}>
           <Image source={require('../assets/footer-icons/chat_new.png')} style={[styles.navIcon, { tintColor: '#000' }]} />
           <Text style={styles.navText}>Support</Text>
         </TouchableOpacity>
