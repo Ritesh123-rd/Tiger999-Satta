@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -18,16 +19,21 @@ import CustomLoader from '../../components/CustomLoader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useRef } from 'react';
-import { getWalletBalance, UserQrAddPointsRequests, paymentGetWay, paymentStatus } from '../../api/auth';
+import { getWalletBalance, UserQrAddPointsRequests, paymentGetWay, paymentStatus, AdminContactDetailes } from '../../api/auth';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomAlert from '../../components/CustomAlert';
 
 
 export default function AddFundScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('');
 
   const [balance, setBalance] = useState(0.0);
   const [userData, setUserData] = useState({ username: 'User', mobile: '', user_id: '' });
+  const [adminContacts, setAdminContacts] = useState({
+    call: '9999999999',
+    whatsapp: '9999999999'
+  });
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -273,6 +279,18 @@ export default function AddFundScreen({ navigation }) {
       });
 
       if (mobile && userId) {
+        try {
+          const contactsResponse = await AdminContactDetailes();
+          if (contactsResponse && contactsResponse.status && contactsResponse.data) {
+            setAdminContacts({
+              call: contactsResponse.data.Call_Number || '9999999999',
+              whatsapp: contactsResponse.data.Whatsapp || '9999999999'
+            });
+          }
+        } catch (e) {
+          console.error('Error fetching admin contacts:', e);
+        }
+
         const response = await getWalletBalance(mobile, userId);
         if (response && (response.status === true || response.status === 'true')) {
           const newBalance = parseFloat(response.balance);
@@ -328,11 +346,11 @@ export default function AddFundScreen({ navigation }) {
   };
 
   const handleCall = () => {
-    Linking.openURL('tel:+919999999999');
+    Linking.openURL(`tel:+91${adminContacts.call}`);
   };
 
   const handleWhatsApp = () => {
-    Linking.openURL('https://wa.me/919999999999');
+    Linking.openURL(`https://wa.me/91${adminContacts.whatsapp}`);
   };
 
   const handleQRScan = () => {
@@ -465,7 +483,7 @@ export default function AddFundScreen({ navigation }) {
         <Text style={styles.headerTitle}>Add  Fund</Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-           
+
           <TouchableOpacity onPress={() => navigation.navigate('AddFundHistory')} style={styles.historyBtn}>
             <Ionicons name="time" size={24} color="#C27183" />
           </TouchableOpacity>
@@ -478,7 +496,7 @@ export default function AddFundScreen({ navigation }) {
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -486,9 +504,9 @@ export default function AddFundScreen({ navigation }) {
           contentContainerStyle={styles.scrollContentContainer}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
-              onRefresh={onRefresh} 
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
               tintColor="transparent"
               colors={['transparent']}
               progressBackgroundColor="transparent"
@@ -510,13 +528,9 @@ export default function AddFundScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Divider with Query Text */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-          </View>
-          <Text style={styles.queryText}>For Fund Query's please Call Or Whatsapp</Text>
+          {/* QR Payment Section */}
+          <Text style={styles.queryText}>Tap Below To Add Fund Via QR</Text>
 
-          {/* Call & WhatsApp Buttons */}
           <View style={styles.contactButtonsRow}>
             {/* <TouchableOpacity style={styles.modernContactBtn} onPress={handleCall}>
               <View style={[styles.contactIconCircle, { backgroundColor: '#E3F2FD' }]}>
@@ -693,7 +707,7 @@ export default function AddFundScreen({ navigation }) {
           </View>
         </ScrollView>
 
-        <View style={styles.buttonContainer}>
+        <View style={[styles.buttonContainer, { paddingBottom: Math.max(insets.bottom + 10, 30) }]}>
           <TouchableOpacity
             style={[styles.payButton, submitting && { opacity: 0.7 }]}
             onPress={handleAddFund}

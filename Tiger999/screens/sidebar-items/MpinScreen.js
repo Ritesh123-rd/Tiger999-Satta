@@ -16,7 +16,9 @@ import { LoginWithMPin } from '../../api/auth'; // Using this as a check or plac
 
 export default function MpinScreen({ navigation }) {
     const [mpin, setMpin] = useState('');
+    const [showMpin, setShowMpin] = useState(false);
     const [confirmMpin, setConfirmMpin] = useState('');
+    const [showConfirmMpin, setShowConfirmMpin] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Custom Alert State
@@ -29,11 +31,21 @@ export default function MpinScreen({ navigation }) {
     });
 
     const handleGenerateMpin = async () => {
+        if (mpin.length === 0) {
+            setAlertConfig({
+                visible: true,
+                title: 'MPIN Required',
+                message: 'Please enter a 4-6 digit MPIN.',
+                type: 'error'
+            });
+            return;
+        }
+
         if (mpin.length < 4) {
             setAlertConfig({
                 visible: true,
-                title: 'Error',
-                message: 'MPIN must be at least 4 digits',
+                title: 'Invalid MPIN',
+                message: 'MPIN must be at least 4 digits.',
                 type: 'error'
             });
             return;
@@ -114,11 +126,14 @@ export default function MpinScreen({ navigation }) {
                         placeholder="Enter 4-6 digit MPIN"
                         placeholderTextColor="#999"
                         keyboardType="number-pad"
-                        secureTextEntry
+                        secureTextEntry={!showMpin}
                         maxLength={6}
                         value={mpin}
                         onChangeText={(text) => setMpin(text.replace(/[^0-9]/g, ''))}
                     />
+                    <TouchableOpacity onPress={() => setShowMpin(!showMpin)} style={styles.eyeToggle}>
+                        <Ionicons name={showMpin ? 'eye' : 'eye-off'} size={20} color="#999" />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Confirm MPIN Input */}
@@ -130,11 +145,14 @@ export default function MpinScreen({ navigation }) {
                         placeholder="Confirm your MPIN"
                         placeholderTextColor="#999"
                         keyboardType="number-pad"
-                        secureTextEntry
+                        secureTextEntry={!showConfirmMpin}
                         maxLength={6}
                         value={confirmMpin}
                         onChangeText={(text) => setConfirmMpin(text.replace(/[^0-9]/g, ''))}
                     />
+                    <TouchableOpacity onPress={() => setShowConfirmMpin(!showConfirmMpin)} style={styles.eyeToggle}>
+                        <Ionicons name={showConfirmMpin ? 'eye' : 'eye-off'} size={20} color="#999" />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Submit Button */}
@@ -261,6 +279,11 @@ const styles = StyleSheet.create({
         color: '#000',
         letterSpacing: 2,
         fontFamily: 'Poppins_600SemiBold',
+    },
+    eyeToggle: {
+        paddingHorizontal: 5,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     submitButton: {
         backgroundColor: '#C36578',

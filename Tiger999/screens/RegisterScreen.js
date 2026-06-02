@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -19,9 +20,11 @@ import logo from '../assets/logo/logo.png';
 import { registerUser } from '../api/auth';
 
 export default function RegisterScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showMpin, setShowMpin] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,8 +57,8 @@ export default function RegisterScreen({ navigation }) {
       if (username.length <= 4) {
         setAlertConfig({
           visible: true,
-          title: 'Validation Error',
-          message: 'Username must be more than 5 characters long',
+          title: 'Invalid Username',
+          message: 'Username must be more than 5 characters long.',
           type: 'error'
         });
         return;
@@ -63,8 +66,8 @@ export default function RegisterScreen({ navigation }) {
       if (password.length !== 4) {
         setAlertConfig({
           visible: true,
-          title: 'Validation Error',
-          message: 'M-PIN must be exactly 4 digits long',
+          title: 'Invalid MPIN',
+          message: 'MPIN must be exactly 4 digits.',
           type: 'error'
         });
         return;
@@ -105,8 +108,8 @@ export default function RegisterScreen({ navigation }) {
         } else {
           setAlertConfig({
             visible: true,
-            title: 'Error',
-            message: response.message || 'Registration failed',
+            title: 'Registration Failed',
+            message: response.message || 'Registration failed. Please try again.',
             type: 'error'
           });
         }
@@ -114,8 +117,8 @@ export default function RegisterScreen({ navigation }) {
       } catch (error) {
         setAlertConfig({
           visible: true,
-          title: 'Error',
-          message: 'Registration Error: ' + error.message,
+          title: 'Connection Error',
+          message: 'Unable to connect. Please check your internet connection and try again.',
           type: 'error'
         });
       } finally {
@@ -123,10 +126,21 @@ export default function RegisterScreen({ navigation }) {
         setIsLoading(false);
       }
     } else {
+      let errorMessage = 'Please fill in all fields.';
+      if (!phone && !username && !password) {
+        errorMessage = 'Please fill in all fields - Phone, Username and MPIN.';
+      } else if (!phone) {
+        errorMessage = 'Please enter your mobile number.';
+      } else if (!username) {
+        errorMessage = 'Please enter a username.';
+      } else if (!password) {
+        errorMessage = 'Please enter a 4-digit MPIN.';
+      }
+
       setAlertConfig({
         visible: true,
-        title: 'Error',
-        message: 'Please fill all fields',
+        title: 'Missing Details',
+        message: errorMessage,
         type: 'error'
       });
     }
@@ -189,13 +203,16 @@ export default function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Mpin (4 digits)"
-            secureTextEntry={true}
+            secureTextEntry={!showMpin}
             placeholderTextColor="#999"
             keyboardType="number-pad"
             maxLength={4}
             value={password}
             onChangeText={(text) => setPassword(text.replace(/[^0-9]/g, ''))}
           />
+          <TouchableOpacity onPress={() => setShowMpin(!showMpin)} style={styles.eyeIcon}>
+            <Ionicons name={showMpin ? 'eye' : 'eye-off'} size={22} color="#999" />
+          </TouchableOpacity>
         </View>
 
 
@@ -215,6 +232,7 @@ export default function RegisterScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backText}>Already have an account? Login</Text>
         </TouchableOpacity>
+        <View style={{ height: Math.max(insets.bottom + 10, 20) }} />
       </View>
 
       <CustomAlert
@@ -316,6 +334,11 @@ const styles = StyleSheet.create({
     paddingRight: 15,
     color: '#000',
     fontFamily: 'Poppins_600SemiBold',
+  },
+  eyeIcon: {
+    paddingHorizontal: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   registerButton: {
     width: '90%',

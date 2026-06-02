@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, Image, StyleSheet, Text, Platform, Alert } from 'react-native';
+import { View, Image, StyleSheet, Text, Platform, Alert, ActivityIndicator } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
@@ -118,29 +118,40 @@ const Stack = createStackNavigator();
 
 SplashScreen.preventAutoHideAsync();
 
-// Loading Screen Component - Empty (logo is shown by native splash screen)
+// Loading Screen Component
+const { width: SCREEN_WIDTH } = require('react-native').Dimensions.get('window');
+const LOGO_SIZE = SCREEN_WIDTH * 0.35; // 35% of screen width — fits well without cutting
+
 const LoadingScreen = () => (
   <View style={loadingStyles.container}>
-    <Image 
-      source={require('./assets/logo/splash.png')} 
+    <Image
+      source={require('./assets/splash/splash-screen.png')}
       style={loadingStyles.logo}
       resizeMode="contain"
     />
+    <ActivityIndicator size="large" color="#C36578" style={{ marginTop: 30 }} />
+    <Text style={loadingStyles.loadingText}>Loading Tiger 999...</Text>
   </View>
 );
+
 
 const loadingStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5C542',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
-    width: 280,
-    height: 280,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
   },
-
+  loadingText: {
+    marginTop: 20,
+    fontSize: 18,
+    color: '#333',
+    fontWeight: 'bold',
+  }
 });
 
 export default function App() {
@@ -164,7 +175,10 @@ export default function App() {
 
   useEffect(() => {
     if (loaded || error) {
-      SplashScreen.hideAsync();
+      // Add a slight delay so the loading screen is actually visible
+      setTimeout(() => {
+        SplashScreen.hideAsync();
+      }, 3000); // 3 seconds delay for a better "loading" feel
     }
 
     // --- Push Notifications Setup ---

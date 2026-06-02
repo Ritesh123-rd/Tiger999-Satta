@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, TextInput, Modal, ScrollView, RefreshControl } from 'react-native';
 import CustomLoader from '../../components/CustomLoader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +10,7 @@ import CustomAlert from '../../components/CustomAlert';
 
 
 export default function WithdrawFundScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('');
   const [showTermsModal, setShowTermsModal] = useState(true);
 
@@ -345,7 +347,7 @@ export default function WithdrawFundScreen({ navigation }) {
       </ScrollView>
 
       {/* Send Request Button */}
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer, { paddingBottom: Math.max(insets.bottom + 10, 30) }]}>
         <TouchableOpacity
           style={[styles.sendButton, submitting && { opacity: 0.7 }]}
           onPress={handleWithdrawRequest}

@@ -210,7 +210,7 @@ export default function HomeScreen({ navigation }) {
   const shareApp = async () => {
     try {
       await Share.share({
-        message: 'Download TIGER 999 App - Best Satta Matka App! Download now: https://play.google.com/store/apps/details?id=com.tiger999',
+        message: 'Download TIGER 999 App - Best Satta Matka App! Download now: https://dhlmedia.online/GoldenMatka/website',
         title: 'TIGER 999',
       });
     } catch (error) {
@@ -322,6 +322,7 @@ export default function HomeScreen({ navigation }) {
             tintColor="transparent"
             colors={['transparent']}
             progressBackgroundColor="transparent"
+            progressViewOffset={-100}
             style={{ backgroundColor: 'transparent' }}
           />
         }
@@ -407,7 +408,7 @@ export default function HomeScreen({ navigation }) {
           style={styles.navItem}
           onPress={() => navigation.navigate('Funds')}
         >
-          <Image source={require('../assets/footer-icons/bank2.png')} style={[styles.navIcon, { tintColor: '#000' }]} />
+          <Ionicons name="wallet-outline" size={24} color="#000" />
           <Text style={styles.navText}>Funds</Text>
         </TouchableOpacity>
 
@@ -839,7 +840,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     paddingVertical: 10,
-    paddingBottom: 12,
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
     alignItems: 'center',

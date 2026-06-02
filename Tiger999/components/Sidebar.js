@@ -217,16 +217,6 @@ export default function Sidebar({ isVisible, onClose, userData, navigation, shar
                             <Text style={styles.menuText}>Game Rate</Text>
                         </TouchableOpacity>
 
-                        {/* Menu Item - Time Table */}
-                        <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={() => handleLink('TimeTable')}
-                        >
-                            <View style={styles.menuIconContainer}>
-                                <MenuIcon name="timer-outline" type="MaterialCommunityIcons" />
-                            </View>
-                            <Text style={styles.menuText}>Time Table</Text>
-                        </TouchableOpacity>
 
                         {/* Menu Item - Notice board / Rules */}
                         <TouchableOpacity

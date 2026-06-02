@@ -145,10 +145,19 @@ export default function SingleDigitGame({ navigation, route }) {
       setPoints('');
       setPoints('');
     } else {
+      let errorMessage = 'Please enter Ank and Points';
+      if (!ank && !points) {
+        errorMessage = 'Please enter Ank and Points';
+      } else if (!ank) {
+        errorMessage = 'Please enter Ank (Single Digit).';
+      } else if (!points) {
+        errorMessage = 'Please enter Points.';
+      }
+      
       setAlertConfig({
         visible: true,
-        title: 'Error',
-        message: 'Please enter Ank and Points',
+        title: 'Input Required',
+        message: errorMessage,
         type: 'error'
       });
     }

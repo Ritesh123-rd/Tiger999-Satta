@@ -19,6 +19,9 @@ const ExitModal = ({ visible, onClose, onConfirm }) => {
 
     React.useEffect(() => {
         if (visible) {
+            // Reset first, then animate in
+            fadeAnim.setValue(0);
+            scaleAnim.setValue(0.8);
             Animated.parallel([
                 Animated.timing(fadeAnim, {
                     toValue: 1,
@@ -40,7 +43,6 @@ const ExitModal = ({ visible, onClose, onConfirm }) => {
         }
     }, [visible]);
 
-    if (!visible) return null;
 
     const handleExit = () => {
         if (onConfirm) {
