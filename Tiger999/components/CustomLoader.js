@@ -1,86 +1,21 @@
 import React, { useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Animated,
-    Easing,
-    Modal
-} from 'react-native';
+import { View, StyleSheet, Modal, Animated, Easing } from 'react-native';
 
 const CustomLoader = ({ visible }) => {
     const spinAnim = useRef(new Animated.Value(0)).current;
-    const pulseAnim = useRef(new Animated.Value(1)).current;
-    const dot1 = useRef(new Animated.Value(0.3)).current;
-    const dot2 = useRef(new Animated.Value(0.3)).current;
-    const dot3 = useRef(new Animated.Value(0.3)).current;
-    const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         if (visible) {
-            // Fade in
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 250,
-                useNativeDriver: true,
-            }).start();
-
-            // Spin animation
             Animated.loop(
                 Animated.timing(spinAnim, {
                     toValue: 1,
-                    duration: 1000,
+                    duration: 1200, // Smooth spinning duration
                     easing: Easing.linear,
                     useNativeDriver: true,
                 })
             ).start();
-
-            // Pulse animation for inner circle
-            Animated.loop(
-                Animated.sequence([
-                    Animated.timing(pulseAnim, {
-                        toValue: 1.15,
-                        duration: 600,
-                        easing: Easing.inOut(Easing.ease),
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(pulseAnim, {
-                        toValue: 1,
-                        duration: 600,
-                        easing: Easing.inOut(Easing.ease),
-                        useNativeDriver: true,
-                    }),
-                ])
-            ).start();
-
-            // Dot bounce animations
-            const animateDot = (val, delay) => {
-                Animated.loop(
-                    Animated.sequence([
-                        Animated.delay(delay),
-                        Animated.timing(val, {
-                            toValue: 1,
-                            duration: 350,
-                            useNativeDriver: true,
-                        }),
-                        Animated.timing(val, {
-                            toValue: 0.3,
-                            duration: 350,
-                            useNativeDriver: true,
-                        }),
-                    ])
-                ).start();
-            };
-            animateDot(dot1, 0);
-            animateDot(dot2, 180);
-            animateDot(dot3, 360);
         } else {
-            fadeAnim.setValue(0);
             spinAnim.setValue(0);
-            pulseAnim.setValue(1);
-            dot1.setValue(0.3);
-            dot2.setValue(0.3);
-            dot3.setValue(0.3);
         }
     }, [visible]);
 
@@ -91,32 +26,46 @@ const CustomLoader = ({ visible }) => {
         outputRange: ['0deg', '360deg'],
     });
 
+    // Exact dots configuration to match the provided image
+    const dots = [
+        { angle: 0,   size: 16, color: '#F8E79F' }, // Top (Pale Yellow)
+        { angle: 45,  size: 6,  color: '#5A201A' }, // Top-Right (Dark Brown)
+        { angle: 90,  size: 10, color: '#C83B2E' }, // Right (Red)
+        { angle: 135, size: 14, color: '#E7533B' }, // Bottom-Right (Light Red)
+        { angle: 180, size: 18, color: '#D16223' }, // Bottom (Dark Orange)
+        { angle: 225, size: 22, color: '#EA9321' }, // Bottom-Left (Orange)
+        { angle: 270, size: 24, color: '#F1B419' }, // Left (Yellow/Gold)
+        { angle: 315, size: 20, color: '#F6CE44' }, // Top-Left (Light Gold)
+    ];
+
     return (
-        <Modal transparent visible={visible} animationType="none" statusBarTranslucent>
-            <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
-                <View style={styles.card}>
-                    {/* Outer spinning ring */}
-                    <View style={styles.ringWrapper}>
-                        <Animated.View style={[styles.spinRing, { transform: [{ rotate: spin }] }]} />
-
-                        {/* Inner pulsing circle */}
-                        <Animated.View style={[styles.innerCircle, { transform: [{ scale: pulseAnim }] }]}>
-                            <Text style={styles.tigerEmoji}>🐯</Text>
-                        </Animated.View>
-                    </View>
-
-                    {/* Brand text */}
-                    <Text style={styles.brandText}>TIGER 999</Text>
-                    <Text style={styles.loadingLabel}>Loading...</Text>
-
-                    {/* Dot row */}
-                    <View style={styles.dotRow}>
-                        <Animated.View style={[styles.dot, { opacity: dot1, transform: [{ scale: dot1 }] }]} />
-                        <Animated.View style={[styles.dot, { opacity: dot2, transform: [{ scale: dot2 }] }]} />
-                        <Animated.View style={[styles.dot, { opacity: dot3, transform: [{ scale: dot3 }] }]} />
-                    </View>
-                </View>
-            </Animated.View>
+        <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
+            <View style={styles.overlay}>
+                <Animated.View style={[styles.spinnerContainer, { transform: [{ rotate: spin }] }]}>
+                    {dots.map((dot, index) => (
+                        <View
+                            key={index}
+                            style={[
+                                styles.dotWrapper,
+                                { transform: [{ rotate: `${dot.angle}deg` }] }
+                            ]}
+                        >
+                            <View
+                                style={[
+                                    styles.dot,
+                                    {
+                                        width: dot.size,
+                                        height: dot.size,
+                                        borderRadius: dot.size / 2,
+                                        backgroundColor: dot.color,
+                                        transform: [{ translateY: -28 }] // Distance from center
+                                    }
+                                ]}
+                            />
+                        </View>
+                    ))}
+                </Animated.View>
+            </View>
         </Modal>
     );
 };
@@ -124,80 +73,26 @@ const CustomLoader = ({ visible }) => {
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    card: {
-        width: 180,
-        backgroundColor: '#1A1A1A',
-        borderRadius: 24,
-        paddingVertical: 28,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: '#C36578',
-        shadowColor: '#C36578',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 20,
-        elevation: 20,
-    },
-    ringWrapper: {
+    spinnerContainer: {
         width: 80,
         height: 80,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
     },
-    spinRing: {
+    dotWrapper: {
         position: 'absolute',
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        borderWidth: 3.5,
-        borderColor: 'transparent',
-        borderTopColor: '#C36578',
-        borderRightColor: '#FFD700',
-    },
-    innerCircle: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: '#2A2A2A',
+        width: '100%',
+        height: '100%',
         justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#333',
-    },
-    tigerEmoji: {
-        fontSize: 26,
-    },
-    brandText: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#FFD700',
-        letterSpacing: 2,
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 4,
-    },
-    loadingLabel: {
-        fontSize: 12,
-        color: '#aaa',
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 14,
-    },
-    dotRow: {
-        flexDirection: 'row',
-        gap: 8,
         alignItems: 'center',
     },
     dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#C36578',
-    },
+        position: 'absolute',
+    }
 });
 
 export default CustomLoader;

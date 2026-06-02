@@ -464,11 +464,9 @@ export default function LoginScreen({ navigation }) {
                 </Text>
               </TouchableOpacity>
 
-              {phoneNumber.length === 10 && (
-                <TouchableOpacity onPress={() => setLoginMode('mpin')}>
-                  <Text style={[styles.signupLink, { marginBottom: 20 }]}>Login with MPIN</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity onPress={() => setLoginMode('mpin')}>
+                <Text style={[styles.signupLink, { marginBottom: 20 }]}>Login with MPIN instead</Text>
+              </TouchableOpacity>
             </>
           ) : (
             <>
