@@ -266,6 +266,9 @@ export default function TriplePanaGame({ navigation, route }) {
 
   };
 
+  const displayTotalBids = Object.keys(panaInputs).filter(k => panaInputs[k] && parseInt(panaInputs[k]) > 0).length;
+  const displayTotalPoints = Object.values(panaInputs).reduce((sum, val) => sum + (parseInt(val) || 0), 0);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EDE0" />
@@ -324,13 +327,22 @@ export default function TriplePanaGame({ navigation, route }) {
         </View>
       </ScrollView>
 
-      {/* Submit Button */}
-      <TouchableOpacity
-        style={[styles.submitButton, { paddingBottom: Math.max(insets.bottom, 16), height: 60 + insets.bottom }]}
-        onPress={handleSubmit}
-      >
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
+      {/* Bottom Submit Bar */}
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12), height: 75 + insets.bottom }]}>
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Bids</Text>
+            <Text style={styles.statValue}>{displayTotalBids}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Points</Text>
+            <Text style={styles.statValue}>{displayTotalPoints}</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Game Type Selection Modal */}
       <Modal
@@ -567,19 +579,47 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
     textAlign: 'center',
   },
-  submitButton: {
-    backgroundColor: '#C36578',
-    paddingVertical: 16,
+  bottomBar: {
+    flexDirection: 'row',
+    backgroundColor: '#EBDCCB',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
     alignItems: 'center',
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    justifyContent: 'center'
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  submitButton: {
+    backgroundColor: '#C36578',
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Poppins_600SemiBold',
   },

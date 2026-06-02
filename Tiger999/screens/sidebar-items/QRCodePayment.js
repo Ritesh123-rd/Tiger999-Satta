@@ -18,6 +18,7 @@ import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QrcodePayment, paymentGetWay } from '../../api/auth';
 import CustomAlert from '../../components/CustomAlert';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const QR_SIZE = SCREEN_WIDTH - 40; // full width minus horizontal padding
@@ -32,6 +33,7 @@ const injectedCSS = `
 `;
 
 export default function QRCodePayment({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('');
   const [utrCode, setUtrCode] = useState('');
   const [qrLoading, setQrLoading] = useState(true);
@@ -348,7 +350,7 @@ export default function QRCodePayment({ navigation }) {
       </ScrollView>
 
       {/* Fixed Submit Button at bottom */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom + 10, 14) }]}>
         <TouchableOpacity 
           style={[styles.submitBtn, isSubmitting && { opacity: 0.7 }]} 
           onPress={handleSubmit}
