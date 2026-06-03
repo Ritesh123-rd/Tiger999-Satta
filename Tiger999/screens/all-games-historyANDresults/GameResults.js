@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { dateViseResult } from '../../api/auth';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -34,6 +35,7 @@ const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')
 const years = ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
 
 export default function GameResults({ navigation }) {
+    const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(false);
     const [marketResults, setMarketResults] = useState([]);
     const [selectedDate, setSelectedDate] = useState(getTodayDate());
@@ -189,7 +191,7 @@ export default function GameResults({ navigation }) {
                 ) : (
                     <ScrollView
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 20 }}
+                        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}
                         refreshControl={
                             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#6B3A3A"]} />
                         }

@@ -14,8 +14,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { dateviseResultPJackpot } from '../../api/auth';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PSjackpotResultScreen = () => {
+    const insets = useSafeAreaInsets();
     const navigation = useNavigation();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [historyData, setHistoryData] = useState([]);
@@ -141,7 +143,7 @@ const PSjackpotResultScreen = () => {
                     data={historyData}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={[styles.listContent, { paddingBottom: Math.max(insets.bottom, 20) }]}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#C36578"]} />
                     }

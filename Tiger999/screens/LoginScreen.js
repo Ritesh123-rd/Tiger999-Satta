@@ -12,7 +12,8 @@ import {
   Linking,
   BackHandler,
   ActivityIndicator,
-  Alert
+  Alert,
+  Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import CustomAlert from '../components/CustomAlert';
@@ -21,6 +22,7 @@ import ExitModal from '../components/ExitModal';
 
 import logo from '../assets/logo/logo.png';
 import { sendOtp, verifyOtp, LoginWithMPin, AdminContactDetailes } from '../api/auth';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 
 export default function LoginScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -40,6 +42,25 @@ export default function LoginScreen({ navigation }) {
     call: '8149182874',
     whatsapp: '8149182874'
   });
+
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, {
+          toValue: 0.3,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(blinkAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        })
+      ])
+    ).start();
+  }, [blinkAnim]);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -287,7 +308,7 @@ export default function LoginScreen({ navigation }) {
     } else {
       let errorTitle = 'Missing Details';
       let errorMessage = 'Please enter your MPIN.';
-      
+
       // If the phone number is already saved/visible as "Welcome back", 
       // we should only talk about MPIN if that's what's missing.
       if (hasSavedMobile) {
@@ -425,11 +446,6 @@ export default function LoginScreen({ navigation }) {
                 {isLoading ? 'Logging in...' : 'Login'}
               </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setLoginMode('otp')}>
-              <Text style={styles.signupLink}>Login with OTP instead</Text>
-            </TouchableOpacity>
-            <View style={{ marginBottom: 20 }} />
           </>
         ) : (
           step === 'mobile' ? (
@@ -453,6 +469,7 @@ export default function LoginScreen({ navigation }) {
                 />
               </View>
 
+
               {/* Send OTP Button */}
               <TouchableOpacity
                 style={[styles.loginButton, isLoading && { opacity: 0.7 }, hasSavedMobile && { marginBottom: 15 }]}
@@ -464,9 +481,7 @@ export default function LoginScreen({ navigation }) {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => setLoginMode('mpin')}>
-                <Text style={[styles.signupLink, { marginBottom: 20 }]}>Login with MPIN instead</Text>
-              </TouchableOpacity>
+
             </>
           ) : (
             <>
@@ -515,17 +530,32 @@ export default function LoginScreen({ navigation }) {
             </>
           )
         )}
-
         {/* Contact Buttons */}
         <View style={[styles.contactContainer, { marginBottom: Math.max(insets.bottom + 10, 20) }]}>
           <TouchableOpacity style={styles.contactButton} onPress={makeCall}>
-            <Ionicons name="call" size={24} color="#000" />
+            <Ionicons name="call" size={20} color="#000" />
           </TouchableOpacity>
+           <TouchableOpacity onPress={() => setLoginMode(loginMode === 'mpin' ? 'otp' : 'mpin')} style={styles.modeToggleButton}>
+              <Text style={styles.modeToggleText} numberOfLines={1} adjustsFontSizeToFit>{loginMode === 'mpin' ? 'OTP Login' : 'MPIN Login'}</Text>
+            </TouchableOpacity>
+            <Animated.View style={{ opacity: blinkAnim, flex: 1, marginHorizontal: 5 }}>
+              <TouchableOpacity style={styles.signupContactButton} onPress={() => navigation.navigate('Register')}>
+                <View style={{ ...StyleSheet.absoluteFillObject, borderRadius: 50, overflow: 'hidden' }}>
+                  <Svg height="100%" width="100%">
+                    <Defs>
+                      <LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <Stop offset="0%" stopColor="#ff007f" stopOpacity="1" />
+                        <Stop offset="100%" stopColor="#7928ca" stopOpacity="1" />
+                      </LinearGradient>
+                    </Defs>
+                    <Rect width="100%" height="100%" fill="url(#grad)" />
+                  </Svg>
+                </View>
+                <Text style={styles.signupContactText} numberOfLines={1} adjustsFontSizeToFit>Register</Text>
+              </TouchableOpacity>
+            </Animated.View>
           <TouchableOpacity style={styles.contactButton} onPress={openWhatsApp}>
-            <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.signupContactButton} onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.signupContactText}>Sign Up</Text>
+            <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
           </TouchableOpacity>
         </View>
       </View>
@@ -665,15 +695,17 @@ const styles = StyleSheet.create({
   },
   contactContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 30,
-    marginBottom: 40,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 0,
+    gap: 8,
   },
   contactButton: {
-    width: 60,
-    height: 60,
+    width: 45,
+    height: 45,
     backgroundColor: '#fff',
-    borderRadius: 30,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -681,25 +713,49 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
+  },
+  modeToggleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  modeToggleText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'Poppins_600SemiBold',
   },
   signupContactButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    backgroundColor: '#fff',
-    borderRadius: 30,
+    flex: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    paddingVertical: 10,
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowColor: '#7928ca',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15,
+    elevation: 8,
   },
   signupContactText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#C36578',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#ffffff',
     fontFamily: 'Poppins_600SemiBold',
+    marginRight: 4,
+    flexShrink: 1,
   },
   signupContainer: {
     flexDirection: 'row',

@@ -363,10 +363,7 @@ export default function SPMotorGame({ navigation, route }) {
             {/* Static Content Container */}
             <View style={styles.staticContent}>
                 <View style={styles.topRow}>
-                    <View style={styles.datePickerBtn}>
-                        <Ionicons name="calendar-outline" size={18} color="#C36578" />
-                        <Text style={styles.dateText}>{getCurrentDate()}</Text>
-                    </View>
+
                     <TouchableOpacity style={styles.dropdown} onPress={() => setShowDropdown(true)}>
                         <Text style={styles.dropdownText}>{selectedGameType}</Text>
                         <Ionicons name="chevron-down" size={20} color="#666" />
@@ -618,6 +615,7 @@ const styles = StyleSheet.create({
     },
     topRow: {
         flexDirection: 'row',
+        justifyContent: 'flex-end',
         gap: 12,
         marginBottom: 20
     },
@@ -637,7 +635,7 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     dropdown: {
-        flex: 1,
+        width: '45%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',

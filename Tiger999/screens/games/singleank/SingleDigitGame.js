@@ -363,10 +363,7 @@ export default function SingleDigitGame({ navigation, route }) {
           <View style={styles.specialPillsContainer}>
             {/* Pill Selectors */}
             <View style={styles.pillRow}>
-              <View style={styles.pill}>
-                <Ionicons name="calendar-outline" size={20} color="#C36578" />
-                <Text style={styles.pillText}>{currentDate}</Text>
-              </View>
+
               <TouchableOpacity style={styles.pill} onPress={() => setShowDropdown(true)}>
                 <Text style={styles.pillText}>{selectedGame}</Text>
                 <Ionicons name="chevron-down" size={20} color="#C36578" style={styles.pillChevron} />

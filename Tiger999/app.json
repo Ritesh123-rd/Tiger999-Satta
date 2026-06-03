@@ -29,6 +29,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
+      },
+      "navigationBar": {
+        "backgroundColor": "#000000",
+        "barStyle": "light-content"
       }
     },
     "plugins": [

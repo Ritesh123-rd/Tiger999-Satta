@@ -303,10 +303,7 @@ export default function RedJodiGame({ navigation, route }) {
 
             <View style={styles.staticContent}>
                 <View style={styles.topRow}>
-                    <View style={styles.datePickerBtn}>
-                        <Ionicons name="calendar-outline" size={18} color="#C36578" />
-                        <Text style={styles.dateText}>{getCurrentDate()}</Text>
-                    </View>
+
                     <TouchableOpacity style={styles.dropdown} onPress={() => setShowDropdown(true)}>
                         <Text style={styles.dropdownText}>{selectedGameType}</Text>
                         <Ionicons name="chevron-down" size={20} color="#666" />
@@ -479,10 +476,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingBottom: 150,
     },
-    topRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+    topRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginBottom: 20 },
     datePickerBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 30, gap: 8 },
     dateText: { fontSize: 14, color: '#000', fontWeight: '500' },
-    dropdown: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 30 },
+    dropdown: { width: '45%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 30 },
     dropdownText: { fontSize: 14, color: '#000', fontWeight: '500' },
     jodiGrid: { gap: 8 },
     jodiRow: { flexDirection: 'row', gap: 10 },

@@ -557,10 +557,7 @@ export default function DoublePanaGame({ navigation, route }) {
         ) : (
           <View style={styles.specialModeHeaderFixed}>
             <View style={styles.specialModeHeader}>
-              <View style={styles.datePickerBtn}>
-                <Ionicons name="calendar-outline" size={16} color="#C36578" />
-                <Text style={styles.dateText}>{getCurrentDate()}</Text>
-              </View>
+
               <TouchableOpacity
                 style={styles.dropdownSmall}
                 onPress={() => setShowDropdown(!showDropdown)}
@@ -850,7 +847,7 @@ const styles = StyleSheet.create({
     flex: 1.2,
   },
   dropdownSmall: {
-    flex: 1,
+    width: '45%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1082,6 +1079,7 @@ const styles = StyleSheet.create({
   // Special Mode Styles
   specialModeHeader: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: 10,
     marginBottom: 15,
   },

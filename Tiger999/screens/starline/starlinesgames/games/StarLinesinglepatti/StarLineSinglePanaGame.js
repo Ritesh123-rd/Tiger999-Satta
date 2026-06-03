@@ -440,15 +440,9 @@ export default function StarLineSinglePanaGame({ navigation, route }) {
                         </>
                     ) : (
                         <View style={styles.specialModeContainer}>
-                            {/* Date & Type Row */}
-                            <View style={styles.specialTopRow}>
-                                <View style={[styles.dateBox, { flex: 1, marginRight: 10 }]}>
-                                    <Ionicons name="calendar" size={20} color="#C36578" style={{ marginRight: 8 }} />
-                                    <Text style={styles.dateText}>
-                                        {currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}
-                                    </Text>
-                                </View>
-                                <TouchableOpacity style={[styles.dropdown, { flex: 1 }]} onPress={() => setShowDropdown(true)}>
+                            {/* Type Row */}
+                            <View style={[styles.specialTopRow, { justifyContent: 'flex-end' }]}>
+                                <TouchableOpacity style={[styles.dropdown, { width: '45%' }]} onPress={() => setShowDropdown(true)}>
                                     <Text style={styles.dropdownText}>{selectedGame}</Text>
                                     <Ionicons name="chevron-down" size={20} color="#F5C542" />
                                 </TouchableOpacity>

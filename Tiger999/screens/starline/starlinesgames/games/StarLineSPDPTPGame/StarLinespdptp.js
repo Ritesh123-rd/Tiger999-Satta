@@ -615,6 +615,7 @@ const styles = StyleSheet.create({
     content: { flex: 1, padding: 15 },
     dateRow: {
         flexDirection: 'row',
+        justifyContent: 'flex-end',
         marginBottom: 20,
         gap: 10,
     },
@@ -630,7 +631,7 @@ const styles = StyleSheet.create({
     },
     dateText: { fontSize: 14, color: '#000', fontFamily: 'Poppins_600SemiBold' },
     dropdown: {
-        flex: 1,
+        width: '45%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',

@@ -349,15 +349,7 @@ const JackpotJodiGame = ({ navigation, route }) => {
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
-                {/* Common Top Inputs */}
-                {mode === 'SPECIAL' && (
-                    <View style={styles.inputGroup}>
-                        <View style={styles.dateBadge}>
-                            <Ionicons name="calendar-outline" size={18} color="#C36578" />
-                            <Text style={styles.dateText}>{currentDate}</Text>
-                        </View>
-                    </View>
-                )}
+
 
 
 

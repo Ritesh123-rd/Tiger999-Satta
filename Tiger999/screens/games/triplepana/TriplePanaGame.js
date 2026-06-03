@@ -288,10 +288,7 @@ export default function TriplePanaGame({ navigation, route }) {
       <View style={styles.staticContent}>
         {/* Date and Game Type Row */}
         <View style={styles.topRow}>
-          <View style={styles.datePickerBtn}>
-            <Ionicons name="calendar-outline" size={16} color="#C36578" />
-            <Text style={styles.dateText}>{getCurrentDate()}</Text>
-          </View>
+
           <TouchableOpacity
             style={styles.dropdown}
             onPress={() => setShowDropdown(true)}
@@ -502,6 +499,7 @@ const styles = StyleSheet.create({
   },
   topRow: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: 10,
     marginBottom: 20,
   },
@@ -523,7 +521,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
   },
   dropdown: {
-    flex: 1,
+    width: '45%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

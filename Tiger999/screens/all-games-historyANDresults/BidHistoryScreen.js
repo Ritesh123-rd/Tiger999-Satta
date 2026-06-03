@@ -16,6 +16,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { bidhistory } from '../../api/auth';
 import CustomAlert from '../../components/CustomAlert';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -33,6 +34,7 @@ const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')
 const years = ['2024', '2025', '2026'];
 
 export default function BidHistoryScreen({ navigation }) {
+    const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [allBids, setAllBids] = useState([]);
@@ -221,8 +223,7 @@ export default function BidHistoryScreen({ navigation }) {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Bid History</Text>
                 <TouchableOpacity style={styles.headerRight} onPress={fetchBids}>
-                    <Text style={styles.filterText}>Search</Text>
-                    <Ionicons name="search" size={22} color="#000" />
+                    <Ionicons name="refresh" size={24} color="#000" />
                 </TouchableOpacity>
             </View>
 
@@ -268,7 +269,7 @@ export default function BidHistoryScreen({ navigation }) {
             </View>
 
             {/* Pagination Footer */}
-            <View style={styles.paginationFooter}>
+            <View style={[styles.paginationFooter, { paddingBottom: Math.max(insets.bottom, 12), paddingTop: 12 }]}>
                 <TouchableOpacity
                     style={[styles.pageButton, currentPage === 1 && { opacity: 0.5 }]}
                     onPress={handlePrev}

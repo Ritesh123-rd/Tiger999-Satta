@@ -361,10 +361,7 @@ export default function SPDPTPGame({ navigation, route }) {
 
       <View style={styles.staticContent}>
         <View style={styles.dateRow}>
-          <View style={styles.dateBox}>
-            <Ionicons name="calendar" size={20} color="#C36578" />
-            <Text style={styles.dateText}>{date}</Text>
-          </View>
+
           <View style={styles.dropdown}>
             <Text style={styles.dropdownText}>{selectedGame}</Text>
             <Ionicons name="chevron-down" size={20} color="#F5C542" />
@@ -640,6 +637,7 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     marginBottom: 20,
     gap: 10,
   },
@@ -655,7 +653,7 @@ const styles = StyleSheet.create({
   },
   dateText: { fontSize: 14, color: '#000', fontFamily: 'Poppins_600SemiBold' },
   dropdown: {
-    flex: 1,
+    width: '45%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
